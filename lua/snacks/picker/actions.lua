@@ -482,6 +482,19 @@ function M.git_checkout(picker, item)
   end
 end
 
+function M.git_worktree_switch(picker, item)
+  picker:close()
+  if item and item.path then
+    -- Open new tab with empty buffer (preserves current tab's buffers)
+    vim.cmd("tabnew")
+    -- Set tab-local cwd to the worktree
+    vim.cmd("tcd " .. vim.fn.fnameescape(item.path))
+    -- Store worktree name for tabline plugins (e.g., bufferline.nvim with custom name_formatter)
+    vim.t.tabname = item.branch or item.basename
+    Snacks.notify("Switched to worktree: " .. item.basename, { title = "Git Worktree" })
+  end
+end
+
 function M.git_branch_add(picker)
   Snacks.input.input({
     prompt = "New Branch Name",
