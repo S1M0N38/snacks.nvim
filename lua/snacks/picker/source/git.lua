@@ -481,4 +481,45 @@ function M.merge_status(a, b)
   return "M "
 end
 
+---@param opts snacks.picker.git.Config
+---@type snacks.picker.finder
+function M.worktrees(opts, ctx)
+  local args = M.git("worktree", "list", { args = { "--no-pager" } }, opts)
+  local cwd = ctx:git_root()
+  local current_root = Snacks.git.get_root()
+
+  return require("snacks.picker.source.proc").proc(
+    ctx:opts({
+      cwd = cwd,
+      cmd = "git",
+      args = args,
+      ---@param item snacks.picker.finder.Item
+      transform = function(item)
+        -- Parse: /path/to/worktree  abc1234 [branch-name]
+        -- Or:    /path/to/worktree  abc1234 (bare)
+        local path, commit, branch = item.text:match("^(.+)%s+(%S+)%s+%[(.-)%]$")
+        if not path then
+          -- Check for bare repo or detached HEAD
+          if item.text:match("%(bare%)") then
+            return false -- Filter out bare repos
+          end
+          -- Try to parse detached HEAD: /path/to/worktree  abc1234 (detached HEAD)
+          path, commit = item.text:match("^(.+)%s+(%S+)%s+%(detached HEAD%)$")
+          if not path then
+            return false
+          end
+        end
+        path = vim.trim(path)
+        item.cwd = cwd
+        item.path = path
+        item.commit = commit
+        item.branch = branch
+        item.basename = vim.fn.fnamemodify(path, ":t")
+        item.current = current_root and svim.fs.normalize(path) == svim.fs.normalize(current_root)
+      end,
+    }),
+    ctx
+  )
+end
+
 return M
