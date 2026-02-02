@@ -440,6 +440,25 @@ M.git_stash = {
   confirm = "git_stash_apply",
 }
 
+---@class snacks.picker.git.worktrees.Config: snacks.picker.git.Config
+M.git_worktrees = {
+  finder = "git_worktrees",
+  format = "git_worktree",
+  preview = "git_log",
+  confirm = "git_worktree_switch",
+  ---@param picker snacks.Picker
+  on_show = function(picker)
+    -- Auto-focus current worktree
+    for i, item in ipairs(picker:items()) do
+      if item.current then
+        picker.list:view(i)
+        Snacks.picker.actions.list_scroll_center(picker)
+        break
+      end
+    end
+  end,
+}
+
 ---@class snacks.picker.git.status.Config: snacks.picker.git.Config
 ---@field ignored? boolean show ignored files
 M.git_status = {
