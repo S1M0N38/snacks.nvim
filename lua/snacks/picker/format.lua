@@ -260,6 +260,23 @@ function M.git_stash(item, picker)
   return ret
 end
 
+function M.git_worktree(item, picker)
+  local a = Snacks.picker.util.align
+  local ret = {} ---@type snacks.picker.Highlight[]
+  -- Current indicator
+  if item.current then
+    ret[#ret + 1] = { a("", 2), "SnacksPickerGitBranchCurrent" }
+  else
+    ret[#ret + 1] = { a("", 2) }
+  end
+  -- Branch name
+  ret[#ret + 1] = { a(item.branch or "(detached)", 25, { truncate = true }), "SnacksPickerGitBranch" }
+  ret[#ret + 1] = { " " }
+  -- Worktree basename
+  ret[#ret + 1] = { a(item.basename, 30, { truncate = true }), "SnacksPickerDirectory" }
+  return ret
+end
+
 function M.tree(item, picker)
   local ret = {} ---@type snacks.picker.Highlight[]
   local icons = picker.opts.icons.tree
